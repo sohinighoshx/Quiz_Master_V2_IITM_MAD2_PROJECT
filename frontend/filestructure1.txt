@@ -1,0 +1,12 @@
+views/
+├── AdminDashboard.vue
+│   ├── ManageSubjects.vue
+│   ├── ManageChapters.vue
+│   ├── ManageQuizzes.vue
+│   ├── ManageQuestions.vue
+│   └── ExportReport.vue
+├── UserDashboard.vue
+│   ├── BrowseQuizzes.vue
+│   ├── AttemptQuiz.vue
+│   ├── QuizHistory.vue
+│   └── ExportUserReport.vue

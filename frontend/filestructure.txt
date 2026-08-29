@@ -1,0 +1,18 @@
+frontend/
+├── public/
+├── src/
+│   ├── assets/                     ✅ For images, logos, etc.
+│   ├── components/                ✅ Shared components (Navbar, etc.)
+│   │   └── Navbar.vue             ✅ We'll build this next
+│   ├── views/                     ✅ Main pages of the app
+│   │   ├── Index.vue              ✅ Landing page
+│   │   ├── Login.vue              ✅ User login
+│   │   ├── Register.vue           ✅ User registration
+│   │   ├── AdminDashboard.vue     ✅ Admin panel
+│   │   └── UserDashboard.vue      ✅ User panel
+│   ├── router/
+│   │   └── index.js               ✅ Vue Router setup
+│   ├── App.vue                    ✅ Main layout file
+│   └── main.js                    ✅ Entry point
+├── package.json                   ✅ Project config
+└── vite.config.js                 ✅ Vite build config
