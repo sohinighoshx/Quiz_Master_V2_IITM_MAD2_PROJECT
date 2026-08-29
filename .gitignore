@@ -27,3 +27,8 @@ frontend/dist/
 # IDE
 .vscode/
 .idea/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
