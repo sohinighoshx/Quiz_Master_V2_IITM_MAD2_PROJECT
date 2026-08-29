@@ -8,3 +8,4 @@ redis
 flask-mail
 python-dotenv
 fpdf
+gunicorn
