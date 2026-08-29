@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from '@/axios'
 
 export default {
   data() {
@@ -82,24 +82,26 @@ export default {
       password: '',
       qualification: '',
       dob: '',
-      today: new Date().toISOString().split('T')[0] // 📅 today's date
+      today: new Date().toISOString().split('T')[0]
     }
   },
+
   methods: {
     async register() {
       try {
-        const res = await axios.post('http://localhost:5001/signup', {
+        await api.post('/signup', {
           full_name: this.full_name,
           email: this.email,
           password: this.password,
           qualification: this.qualification,
           dob: this.dob
         })
+
         alert('Signup successful ✅')
         this.$router.push('/login')
       } catch (err) {
         console.error(err.response?.data || err.message)
-        alert('Signup failed ❌')
+        alert(err.response?.data?.message || 'Signup failed ❌')
       }
     }
   }

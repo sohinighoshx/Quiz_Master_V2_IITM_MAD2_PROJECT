@@ -8,14 +8,17 @@ export default defineConfig({
     vue(),
     vueDevTools()
   ],
+
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+
   server: {
     proxy: {
-      // All these routes will be proxied to Flask
+      '/login': 'http://localhost:5001',
+      '/signup': 'http://localhost:5001',
       '/admin': 'http://localhost:5001',
       '/auth': 'http://localhost:5001',
       '/user': 'http://localhost:5001'

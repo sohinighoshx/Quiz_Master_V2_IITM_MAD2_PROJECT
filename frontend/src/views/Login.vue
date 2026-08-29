@@ -37,7 +37,8 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from '@/axios'
+
 export default {
   data() {
     return {
@@ -45,25 +46,29 @@ export default {
       password: ''
     }
   },
+
   methods: {
     async login() {
       try {
-        const res = await axios.post('http://localhost:5001/login', {
+        const res = await api.post('/login', {
           email: this.email,
           password: this.password
         })
+
         localStorage.setItem('token', res.data.access_token)
         localStorage.setItem('role', res.data.role)
-        this.$router.push(res.data.role === 'admin' ? '/admin' : '/user')
+
+        this.$router.push(
+          res.data.role === 'admin' ? '/admin' : '/user'
+        )
       } catch (err) {
         console.error(err.response?.data || err.message)
-        alert('Login failed ❌')
+        alert(err.response?.data?.message || 'Login failed ❌')
       }
     }
   }
 }
 </script>
-
 <style scoped>
 .login-wrapper {
   min-height: 100vh;
