@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const instance = axios.create({
-  baseURL: '/', // Vite will proxy based on route
+  baseURL: 'https://quiz-master-v2-iitm-mad2-project.onrender.com',
 })
 
 instance.interceptors.request.use(config => {
