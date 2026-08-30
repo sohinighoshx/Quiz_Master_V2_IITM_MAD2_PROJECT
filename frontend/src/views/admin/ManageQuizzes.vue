@@ -97,6 +97,7 @@
 
 <script>
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import axios from '@/axios'
 
 export default {
   components: { AdminLayout },
@@ -117,6 +118,7 @@ export default {
 
       showQuizForm: false,
       editingQuiz: null,
+
       quizForm: {
         title: '',
         date_of_quiz: '',
@@ -126,7 +128,8 @@ export default {
       },
 
       showQuestionForm: false,
-      editingQuestionId: null, // ✅ added for edit functionality
+      editingQuestionId: null,
+
       questionForm: {
         quiz_id: null,
         question_statement: '',
@@ -147,104 +150,116 @@ export default {
 
   methods: {
     async fetchQuizzes() {
-      const res = await fetch('/admin/quizzes', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await res.json();
-      this.allQuizzes = data.map(q => ({ ...q, showQuestions: false, questions: [] }));
+      const res = await axios.get('/admin/quizzes')
+
+      this.allQuizzes = res.data.map(q => ({
+        ...q,
+        showQuestions: false,
+        questions: []
+      }))
     },
 
     async fetchSubjects() {
-      const res = await fetch('/admin/subject', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      this.allSubjects = await res.json();
+      const res = await axios.get('/admin/subject')
+      this.allSubjects = res.data
     },
 
     async fetchChapters() {
-      const res = await fetch(`/admin/subject/${this.selectedSubjectId}/chapters`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      this.filteredChapters = await res.json();
+      const res = await axios.get(
+        `/admin/subject/${this.selectedSubjectId}/chapters`
+      )
+
+      this.filteredChapters = res.data
     },
 
     async toggleQuestions(quiz) {
       if (!quiz.showQuestions) {
-        const res = await fetch(`/admin/quiz/${quiz.id}/questions`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        quiz.questions = await res.json();
+        const res = await axios.get(
+          `/admin/quiz/${quiz.id}/questions`
+        )
+
+        quiz.questions = res.data
       }
-      quiz.showQuestions = !quiz.showQuestions;
+
+      quiz.showQuestions = !quiz.showQuestions
     },
 
     openAddQuizForm() {
-      this.editingQuiz = null;
+      this.editingQuiz = null
+
       this.quizForm = {
         title: '',
         date_of_quiz: '',
         time_duration: '',
         remarks: '',
         chapter_id: null
-      };
-      this.selectedSubjectId = '';
-      this.selectedChapterId = '';
-      this.filteredChapters = [];
-      this.showQuizForm = true;
+      }
+
+      this.selectedSubjectId = ''
+      this.selectedChapterId = ''
+      this.filteredChapters = []
+      this.showQuizForm = true
     },
 
     openEditQuizForm(quiz) {
-      this.editingQuiz = quiz;
+      this.editingQuiz = quiz
+
       this.quizForm = {
         title: quiz.title,
         date_of_quiz: quiz.date_of_quiz,
         time_duration: quiz.time_duration,
         remarks: quiz.remarks
-      };
-      this.selectedSubjectId = this.allSubjects.find(s => s.name === quiz.subject_name)?.id || '';
+      }
+
+      this.selectedSubjectId =
+        this.allSubjects.find(
+          s => s.name === quiz.subject_name
+        )?.id || ''
+
       this.fetchChapters().then(() => {
-        const ch = this.filteredChapters.find(c => c.name === quiz.chapter_name);
-        this.selectedChapterId = ch?.id || '';
-        this.showQuizForm = true;
-      });
+        const ch = this.filteredChapters.find(
+          c => c.name === quiz.chapter_name
+        )
+
+        this.selectedChapterId = ch?.id || ''
+        this.showQuizForm = true
+      })
     },
 
     async submitQuizForm() {
       const body = {
         ...this.quizForm,
         chapter_id: this.selectedChapterId
-      };
+      }
 
-      const url = this.editingQuiz ? `/admin/quiz/${this.editingQuiz.id}` : '/admin/quiz';
-      const method = this.editingQuiz ? 'PUT' : 'POST';
+      const url = this.editingQuiz
+        ? `/admin/quiz/${this.editingQuiz.id}`
+        : '/admin/quiz'
 
-      await fetch(url, {
+      const method = this.editingQuiz ? 'PUT' : 'POST'
+
+      await axios({
+        url,
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(body)
-      });
+        data: body
+      })
 
-      this.fetchQuizzes();
-      this.closeQuizForm();
+      await this.fetchQuizzes()
+      this.closeQuizForm()
     },
 
     closeQuizForm() {
-      this.showQuizForm = false;
+      this.showQuizForm = false
     },
 
     async deleteQuiz(id) {
-      await fetch(`/admin/quiz/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      this.fetchQuizzes();
+      await axios.delete(`/admin/quiz/${id}`)
+      await this.fetchQuizzes()
     },
 
     openAddQuestionForm(quizId) {
-      this.editingQuestionId = null;
+      this.editingQuestionId = null
+
       this.questionForm = {
         quiz_id: quizId,
         question_statement: '',
@@ -253,8 +268,9 @@ export default {
         option3: '',
         option4: '',
         correct_option: ''
-      };
-      this.showQuestionForm = true;
+      }
+
+      this.showQuestionForm = true
     },
 
     openEditQuestionForm(question) {
@@ -266,52 +282,48 @@ export default {
         option3: question.option3,
         option4: question.option4,
         correct_option: question.correct_option
-      };
-      this.editingQuestionId = question.id;
-      this.showQuestionForm = true;
+      }
+
+      this.editingQuestionId = question.id
+      this.showQuestionForm = true
     },
 
     async submitQuestionForm() {
-      const isEditing = !!this.editingQuestionId;
+      const isEditing = !!this.editingQuestionId
+
       const url = isEditing
         ? `/admin/question/${this.editingQuestionId}`
-        : '/admin/question';
-      const method = isEditing ? 'PUT' : 'POST';
+        : '/admin/question'
 
-      await fetch(url, {
+      const method = isEditing ? 'PUT' : 'POST'
+
+      await axios({
+        url,
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(this.questionForm)
-      });
+        data: this.questionForm
+      })
 
-      this.fetchQuizzes();
-      this.closeQuestionForm();
+      await this.fetchQuizzes()
+      this.closeQuestionForm()
     },
 
     async deleteQuestion(id) {
-      await fetch(`/admin/question/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      this.fetchQuizzes();
+      await axios.delete(`/admin/question/${id}`)
+      await this.fetchQuizzes()
     },
 
     closeQuestionForm() {
-      this.showQuestionForm = false;
-      this.editingQuestionId = null;
+      this.showQuestionForm = false
+      this.editingQuestionId = null
     }
   },
 
   mounted() {
-    this.fetchQuizzes();
-    this.fetchSubjects();
+    this.fetchQuizzes()
+    this.fetchSubjects()
   }
-};
+}
 </script>
-
 <style scoped>
 .card {
   border-radius: 12px;
